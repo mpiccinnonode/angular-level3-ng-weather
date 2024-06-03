@@ -14,6 +14,7 @@ import {routing} from "./app.routing";
 import {HttpClientModule} from "@angular/common/http";
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import {WeatherIconPipe} from './core/pipes/weather-icon.pipe';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,7 @@ import { environment } from '../environments/environment';
     ZipcodeEntryComponent,
     ForecastsListComponent,
     CurrentConditionsComponent,
-    MainPageComponent
+    MainPageComponent,
   ],
   imports: [
     BrowserModule,
@@ -29,9 +30,12 @@ import { environment } from '../environments/environment';
     HttpClientModule,
     RouterModule,
     routing,
-    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register("/ngsw-worker.js", {
+      enabled: environment.production,
+    }),
+    WeatherIconPipe,
   ],
   providers: [LocationService, WeatherService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,33 +1,44 @@
-import { Injectable } from '@angular/core';
-import {WeatherService} from "./weather.service";
+import {Injectable, Signal, signal} from '@angular/core';
+import { WeatherService } from "./weather.service";
+import {BehaviorSubject, Observable} from 'rxjs';
 
-export const LOCATIONS : string = "locations";
+export const LOCATIONS: string = "locations";
 
 @Injectable()
 export class LocationService {
+  // refactoring locations into a signal to allow reactive updates notifications
+  private _locations = signal<string[]>(this._initLocations());
 
-  locations : string[] = [];
+  // allows readonly access to locations signal
+  get locations(): Signal<string[]> {
+    return this._locations.asReadonly();
+  }
 
-  constructor(private weatherService : WeatherService) {
+  addLocation(zipcode: string): void {
+    this._locations.update((value) => {
+      value.push(zipcode);
+      return value;
+    });
+    this._cacheLocations();
+  }
+
+  removeLocation(zipcode: string): void {
+    this._locations.update((value) => {
+      const index = value.indexOf(zipcode);
+      if (index !== -1) {
+        value.splice(index, 1);
+      }
+      return value;
+    });
+    this._cacheLocations();
+  }
+
+  private _initLocations(): string[] {
     let locString = localStorage.getItem(LOCATIONS);
-    if (locString)
-      this.locations = JSON.parse(locString);
-    for (let loc of this.locations)
-      this.weatherService.addCurrentConditions(loc);
+    return locString ? JSON.parse(locString) : [];
   }
 
-  addLocation(zipcode : string) {
-    this.locations.push(zipcode);
-    localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
-    this.weatherService.addCurrentConditions(zipcode);
-  }
-
-  removeLocation(zipcode : string) {
-    let index = this.locations.indexOf(zipcode);
-    if (index !== -1){
-      this.locations.splice(index, 1);
-      localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
-      this.weatherService.removeCurrentConditions(zipcode);
-    }
+  private _cacheLocations(): void {
+    localStorage.setItem(LOCATIONS, JSON.stringify(this._locations()));
   }
 }
