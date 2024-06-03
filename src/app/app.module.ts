@@ -15,6 +15,8 @@ import {HttpClientModule} from "@angular/common/http";
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import {WeatherIconPipe} from './core/pipes/weather-icon.pipe';
+import {TabViewComponent} from './shared/tab-view/tab-view.component';
+import {TabItemComponent} from './shared/tab-view/tab-item/tab-item.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +36,8 @@ import {WeatherIconPipe} from './core/pipes/weather-icon.pipe';
       enabled: environment.production,
     }),
     WeatherIconPipe,
+    TabViewComponent,
+    TabItemComponent,
   ],
   providers: [LocationService, WeatherService],
   bootstrap: [AppComponent],
