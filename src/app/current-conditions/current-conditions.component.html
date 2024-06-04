@@ -1,44 +1,36 @@
 <app-tab-view>
-  @for (location of currentConditionsByZip(); track location.zip) {
-    <app-tab-item [title]="location.data.name">
-      <ng-container
-        [ngTemplateOutlet]="weatherData"
-        [ngTemplateOutletContext]="{ location }"
-      ></ng-container>
-    </app-tab-item>
-  }
+    @for (location of currentConditionsByZip(); track location.zip) {
+        <app-tab-item [title]="location.data.name + '\n' + '(' + location.zip + ')'">
+            <ng-container
+                    [ngTemplateOutlet]="weatherData"
+                    [ngTemplateOutletContext]="{ location }"
+            ></ng-container>
+        </app-tab-item>
+    }
 </app-tab-view>
-<div>
-  @for (location of currentConditionsByZip(); track location.zip) {
-    <ng-container
-      [ngTemplateOutlet]="weatherData"
-      [ngTemplateOutletContext]="{ location }"
-    ></ng-container>
-  }
-</div>
 
 <ng-template #weatherData let-location="location">
-  <div class="well flex" (click)="showForecast(location.zip)">
-    <div>
-      <h3>{{ location.data.name }} ({{ location.zip }})</h3>
-      <h4>Current conditions: {{ location.data.weather[0].main }}</h4>
-      <h4>Temperatures today:</h4>
-      <p>
-        Current {{ location.data.main.temp | number: ".0-0" }} - Max
-        {{ location.data.main.temp_max | number: ".0-0" }} - Min
-        {{ location.data.main.temp_min | number: ".0-0" }}
-      </p>
-      <p>
-        <a [routerLink]="['/forecast', location.zip]"
-          >Show 5-day forecast for {{ location.data.name }}</a
-        >
-      </p>
-    </div>
-    <div>
+    <div class="well flex" (click)="showForecast(location.zip)">
+        <div>
+            <h3>{{ location.data.name }} ({{ location.zip }})</h3>
+            <h4>Current conditions: {{ location.data.weather[0].main }}</h4>
+            <h4>Temperatures today:</h4>
+            <p>
+                Current {{ location.data.main.temp | number: ".0-0" }} - Max
+                {{ location.data.main.temp_max | number: ".0-0" }} - Min
+                {{ location.data.main.temp_min | number: ".0-0" }}
+            </p>
+            <p>
+                <a [routerLink]="['/forecast', location.zip]"
+                >Show 5-day forecast for {{ location.data.name }}</a
+                >
+            </p>
+        </div>
+        <div>
       <span class="close" (click)="removeLocation($event, location.zip)"
-        >&times;</span
+      >&times;</span
       >
-      <img [src]="location.data.weather[0].id | weatherIcon" />
+            <img [src]="location.data.weather[0].id | weatherIcon"/>
+        </div>
     </div>
-  </div>
 </ng-template>

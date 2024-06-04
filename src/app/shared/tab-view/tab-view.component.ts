@@ -1,17 +1,36 @@
-import {AfterContentInit, AfterViewInit, Component, ContentChildren, ElementRef, QueryList} from '@angular/core';
-import {TabItemComponent} from './tab-item/tab-item.component';
+import {
+  AfterContentChecked,
+  Component,
+  ContentChildren,
+  QueryList,
+  signal,
+} from "@angular/core";
+import { TabItemComponent } from "./tab-item/tab-item.component";
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 
 @Component({
-  selector: 'app-tab-view',
+  selector: "app-tab-view",
   standalone: true,
-  imports: [],
-  templateUrl: './tab-view.component.html',
-  styleUrl: './tab-view.component.css'
+  imports: [NgTemplateOutlet, NgComponentOutlet],
+  templateUrl: "./tab-view.component.html",
+  styleUrl: "./tab-view.component.css",
 })
-export class TabViewComponent implements AfterViewInit {
-  @ContentChildren(TabItemComponent, {read: ElementRef}) tabItems: QueryList<TabItemComponent>;
+export class TabViewComponent implements AfterContentChecked {
+  @ContentChildren(TabItemComponent)
+  tabItems: QueryList<TabItemComponent>;
 
-  ngAfterViewInit(): void {
-    console.log(this.tabItems)
+  activeIndex = signal<number>(0);
+
+  ngAfterContentChecked(): void {
+    if (this.tabItems && this.tabItems.length) {
+      this._setActiveTab();
+    }
+  }
+
+  private _setActiveTab(): void {
+    this.tabItems.map((item, index) => {
+      item.active = index === this.activeIndex();
+      return item;
+    });
   }
 }
