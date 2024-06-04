@@ -1,15 +1,11 @@
 @if (tabItems && tabItems.length) {
     <div class="d-flex">
         @for (tab of tabItems; track tab.title) {
-            <ng-container
-                    [ngTemplateOutlet]="tabTitle"
-                    [ngTemplateOutletContext]="{ title: tab.title }"
-            ></ng-container>
+            <ng-container [ngTemplateOutlet]="tabTitle" [ngTemplateOutletContext]="{ title: tab.title }"></ng-container>
         }
     </div>
+    <ng-content></ng-content>
 }
-
-<ng-content></ng-content>
 
 <ng-template #tabTitle let-title="title">
     <div class="px-3 py-2 bg-primary border">
