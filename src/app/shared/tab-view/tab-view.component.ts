@@ -1,11 +1,11 @@
 import { AfterContentChecked, Component, ContentChildren, QueryList, signal } from '@angular/core';
 import { TabItemComponent } from './tab-item/tab-item.component';
-import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
+import { NgClass, NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 
 @Component({
     selector: 'app-tab-view',
     standalone: true,
-    imports: [NgTemplateOutlet, NgComponentOutlet],
+    imports: [NgTemplateOutlet, NgComponentOutlet, NgClass],
     templateUrl: './tab-view.component.html',
     styleUrl: './tab-view.component.css',
 })
@@ -29,10 +29,14 @@ export class TabViewComponent implements AfterContentChecked {
         }
     }
 
-    private _setActiveTab(): void {
-        this.tabItems.map((item, index) => {
-            item.active = index === this.activeIndex();
-            return item;
-        });
+    // sets the selected tab as active and hides the previously selected one
+    setActiveTab(index: number): void {
+        const currentlyActive = this.tabItems.get(this.activeIndex());
+        this.activeIndex.set(index);
+        const toActivate = this.tabItems.get(this.activeIndex());
+        currentlyActive.active = false;
+        toActivate.active = true;
+        currentlyActive.cd.markForCheck();
+        toActivate.cd.markForCheck();
     }
 }

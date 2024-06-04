@@ -1,0 +1,7 @@
+.clickable:not(.active) {
+    cursor: pointer;
+}
+
+.active {
+    background: darkblue !important;
+}

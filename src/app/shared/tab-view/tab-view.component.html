@@ -1,14 +1,16 @@
 @if (tabItems && tabItems.length) {
     <div class="d-flex">
-        @for (tab of tabItems; track tab.title) {
-            <ng-container [ngTemplateOutlet]="tabTitle" [ngTemplateOutletContext]="{ title: tab.title }"></ng-container>
+        @for (tab of tabItems; track tab.title; let index = $index) {
+            <ng-container [ngTemplateOutlet]="tabTitle"
+                          [ngTemplateOutletContext]="{ title: tab.title, index }"></ng-container>
         }
     </div>
     <ng-content></ng-content>
 }
 
-<ng-template #tabTitle let-title="title">
-    <div class="px-3 py-2 bg-primary border">
+<ng-template #tabTitle let-title="title" let-index="index">
+    <div class="px-3 py-2 bg-primary border clickable" [ngClass]="{ active: index === activeIndex() }"
+         (click)="setActiveTab(index)">
         <span>{{ title }}</span>
     </div>
 </ng-template>
