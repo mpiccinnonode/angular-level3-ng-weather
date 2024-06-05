@@ -42,6 +42,7 @@ export class TabViewComponent implements AfterContentChecked {
         toActivate.cd.markForCheck();
     }
 
+    // removes the clicked tab item and emits an event with the removed element index
     removeTab(event: MouseEvent, index: number): void {
         event.stopPropagation();
         const tabItem = this.tabItems.get(index);
