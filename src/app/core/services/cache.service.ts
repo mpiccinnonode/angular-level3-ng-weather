@@ -7,7 +7,7 @@ import { HttpResponse } from '@angular/common/http';
 })
 export class CacheService {
     cache = new Map<string, HttpCachedResponse>(this._initCacheFromStorage());
-    timeToLiveInSeconds: number = 30;
+    timeToLiveInMillis: number = 30000;
 
     private readonly _cacheStorageKey = 'HTTP_CACHE';
 
@@ -16,10 +16,10 @@ export class CacheService {
     cacheExpired(url: string): boolean {
         const cachedResponse = this.cache.get(url);
         if (cachedResponse) {
-            const nowSeconds = new Date().getSeconds();
-            const cachedResponseSeconds = cachedResponse.date.getSeconds();
-            const diff = nowSeconds - cachedResponseSeconds;
-            return diff >= this.timeToLiveInSeconds;
+            const nowMillis = Date.now();
+            const cachedResponseMillis = cachedResponse.date.getTime();
+            const diff = nowMillis - cachedResponseMillis;
+            return diff >= this.timeToLiveInMillis;
         } else {
             return false;
         }
