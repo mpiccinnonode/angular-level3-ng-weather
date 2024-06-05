@@ -3,6 +3,7 @@ import { WeatherService } from '../weather.service';
 import { LocationService } from '../location.service';
 import { Router } from '@angular/router';
 import { ConditionsAndZip } from '../conditions-and-zip.type';
+import { TabRemovedEvent } from '../shared/tab-view/models/tab-removed-event.model';
 
 @Component({
     selector: 'app-current-conditions',
@@ -19,9 +20,13 @@ export class CurrentConditionsComponent {
         this.router.navigate(['/forecast', zipcode]);
     }
 
-    removeLocation(event: MouseEvent, zipcode: string): void {
-        // stopping event propagation to prevent it from triggering navigation
-        event.stopPropagation();
+    removeLocationTab(event: TabRemovedEvent): void {
+        const { removedIndex } = event;
+        const location = this.currentConditionsByZip()[removedIndex];
+        this._removeLocation(location.zip);
+    }
+
+    private _removeLocation(zipcode: string): void {
         this.locationService.removeLocation(zipcode);
         this.weatherService.removeCurrentConditions(zipcode);
     }

@@ -10,6 +10,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input } 
 })
 export class TabItemComponent {
     @Input() title: string;
-    @Input() active: boolean = false;
+    active: boolean = false;
+    removed: boolean = false;
     cd = inject(ChangeDetectorRef);
 }

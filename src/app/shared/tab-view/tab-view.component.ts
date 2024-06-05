@@ -1,6 +1,7 @@
-import { AfterContentChecked, Component, ContentChildren, QueryList, signal } from '@angular/core';
+import { AfterContentChecked, Component, ContentChildren, EventEmitter, Output, QueryList, signal } from '@angular/core';
 import { TabItemComponent } from './tab-item/tab-item.component';
 import { NgClass, NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
+import { TabRemovedEvent } from './models/tab-removed-event.model';
 
 @Component({
     selector: 'app-tab-view',
@@ -11,6 +12,7 @@ import { NgClass, NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 })
 export class TabViewComponent implements AfterContentChecked {
     @ContentChildren(TabItemComponent) tabItems: QueryList<TabItemComponent>;
+    @Output() tabRemoved = new EventEmitter<TabRemovedEvent>();
 
     activeIndex = signal<number>(0);
 
@@ -38,5 +40,16 @@ export class TabViewComponent implements AfterContentChecked {
         toActivate.active = true;
         currentlyActive.cd.markForCheck();
         toActivate.cd.markForCheck();
+    }
+
+    removeTab(event: MouseEvent, index: number): void {
+        event.stopPropagation();
+        const tabItem = this.tabItems.get(index);
+        if (tabItem.active) {
+            this.setActiveTab(0);
+        }
+        tabItem.removed = true;
+        tabItem.cd.markForCheck();
+        this.tabRemoved.emit({ removedIndex: index });
     }
 }

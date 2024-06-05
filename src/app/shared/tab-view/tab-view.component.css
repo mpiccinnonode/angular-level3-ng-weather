@@ -5,3 +5,8 @@
 .active {
     background: darkblue !important;
 }
+
+.close {
+    color: white !important;
+    opacity: 1 !important;
+}
