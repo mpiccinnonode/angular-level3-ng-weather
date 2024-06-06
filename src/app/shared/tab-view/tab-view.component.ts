@@ -1,7 +1,8 @@
-import { AfterContentChecked, Component, ContentChildren, EventEmitter, Output, QueryList, signal } from '@angular/core';
+import { AfterContentChecked, Component, ContentChildren, DestroyRef, EventEmitter, Output, QueryList, signal } from '@angular/core';
 import { TabItemComponent } from './tab-item/tab-item.component';
 import { NgClass, NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { TabRemovedEvent } from './models/tab-removed-event.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-tab-view',
@@ -18,7 +19,7 @@ export class TabViewComponent implements AfterContentChecked {
 
     private _firstValueSet = false;
 
-    constructor() {}
+    constructor(private destroyRef: DestroyRef) {}
 
     // AfterContentChecked is the only lifecycle hook that assures proper render in this situation
     ngAfterContentChecked(): void {
@@ -26,6 +27,7 @@ export class TabViewComponent implements AfterContentChecked {
             if (this.tabItems && this.tabItems.length) {
                 this.tabItems.first.active = true;
                 this.tabItems.first.cd.markForCheck();
+                this._listenForSingleTab();
                 this._firstValueSet = true;
             }
         }
@@ -52,5 +54,15 @@ export class TabViewComponent implements AfterContentChecked {
         tabItem.removed = true;
         tabItem.cd.markForCheck();
         this.tabRemoved.emit({ removedIndex: index });
+    }
+
+    // sets active tab if it's the only item
+    private _listenForSingleTab(): void {
+        this.tabItems.changes.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            if (this.tabItems && this.tabItems.length == 1) {
+                this.tabItems.first.active = true;
+                this.tabItems.first.cd.detectChanges();
+            }
+        });
     }
 }
