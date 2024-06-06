@@ -1,9 +1,10 @@
 import { Injectable, Signal, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
-import { CurrentConditions } from './current-conditions/current-conditions.type';
 import { ConditionsAndZip } from './conditions-and-zip.type';
+import { CurrentConditions } from './current-conditions/current-conditions.type';
 import { Forecast } from './forecasts-list/forecast.type';
 
 @Injectable()
@@ -15,22 +16,19 @@ export class WeatherService {
 
     constructor(private http: HttpClient) {}
 
-    addCurrentConditions(zipcode: string): void {
-        // Here we make a request to get the current conditions data from the API. Note the use of backticks and an expression to insert the zipcode
-        this.http
-            .get<CurrentConditions>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
-            .subscribe((data) => this.currentConditions.update((conditions) => [...conditions, { zip: zipcode, data }]));
-    }
-
-    removeCurrentConditions(zipcode: string) {
-        this.currentConditions.update((conditions) => {
-            for (let i in conditions) {
-                if (conditions[i].zip == zipcode) {
-                    conditions.splice(+i, 1);
-                }
-            }
-            return conditions;
-        });
+    alignConditionsToLocations(locations: string[]): void {
+        let conditions = this.currentConditions();
+        // removes deleted locations from conditions array
+        conditions = conditions.filter(({ zip }) => locations.includes(zip));
+        this.currentConditions.set(conditions);
+        /**
+         * gets locations not included in conditions array
+         */
+        const locationsToFetch = locations.filter((item) => !conditions.some(({ zip }) => item === zip));
+        /**
+         * fetches data for missing locations
+         */
+        this._fetchLocations(locationsToFetch);
     }
 
     getCurrentConditions(): Signal<ConditionsAndZip[]> {
@@ -58,5 +56,29 @@ export class WeatherService {
         } else {
             return WeatherService.ICON_URL + 'art_clear.png';
         }
+    }
+
+    private _fetchLocations(locationsToFetch: string[]): void {
+        const zipCodesAndData: ConditionsAndZip[] = [];
+        const apiCalls = locationsToFetch.map((zipcode) => {
+            return this._addCurrentConditions(zipcode).pipe(
+                tap((data) => {
+                    zipCodesAndData.push({ zip: zipcode, data });
+                }),
+            );
+        });
+        if (apiCalls.length) {
+            forkJoin(apiCalls).subscribe(() => {
+                /**
+                 * updates conditions signal with received data
+                 */
+                this.currentConditions.update((value) => [...value, ...zipCodesAndData]);
+            });
+        }
+    }
+
+    private _addCurrentConditions(zipcode: string): Observable<CurrentConditions> {
+        // Here we make a request to get the current conditions data from the API. Note the use of backticks and an expression to insert the zipcode
+        return this.http.get<CurrentConditions>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`);
     }
 }

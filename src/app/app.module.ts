@@ -1,45 +1,38 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { BrowserModule } from '@angular/platform-browser';
 
-import { AppComponent } from './app.component';
-import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
-import {LocationService} from "./location.service";
-import { ForecastsListComponent } from './forecasts-list/forecasts-list.component';
-import {WeatherService} from "./weather.service";
-import { CurrentConditionsComponent } from './current-conditions/current-conditions.component';
-import { MainPageComponent } from './main-page/main-page.component';
-import {RouterModule} from "@angular/router";
-import {routing} from "./app.routing";
-import {HttpClientModule} from "@angular/common/http";
+import { HttpClientModule } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
-import {WeatherIconPipe} from './core/pipes/weather-icon.pipe';
-import {TabViewComponent} from './shared/tab-view/tab-view.component';
-import {TabItemComponent} from './shared/tab-view/tab-item/tab-item.component';
+import { AppComponent } from './app.component';
+import { routing } from './app.routing';
+import { WeatherIconPipe } from './core/pipes/weather-icon.pipe';
+import { CurrentConditionsComponent } from './current-conditions/current-conditions.component';
+import { ForecastsListComponent } from './forecasts-list/forecasts-list.component';
+import { MainPageComponent } from './main-page/main-page.component';
+import { TabItemComponent } from './shared/tab-view/tab-item/tab-item.component';
+import { TabViewComponent } from './shared/tab-view/tab-view.component';
+import { WeatherService } from './weather.service';
+import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    ZipcodeEntryComponent,
-    ForecastsListComponent,
-    CurrentConditionsComponent,
-    MainPageComponent,
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    RouterModule,
-    routing,
-    ServiceWorkerModule.register("/ngsw-worker.js", {
-      enabled: environment.production,
-    }),
-    WeatherIconPipe,
-    TabViewComponent,
-    TabItemComponent,
-  ],
-  providers: [LocationService, WeatherService],
-  bootstrap: [AppComponent],
+    declarations: [AppComponent, ZipcodeEntryComponent, ForecastsListComponent, CurrentConditionsComponent, MainPageComponent],
+    imports: [
+        BrowserModule,
+        FormsModule,
+        HttpClientModule,
+        RouterModule,
+        routing,
+        ServiceWorkerModule.register('/ngsw-worker.js', {
+            enabled: environment.production,
+        }),
+        WeatherIconPipe,
+        TabViewComponent,
+        TabItemComponent,
+    ],
+    providers: [WeatherService],
+    bootstrap: [AppComponent],
 })
 export class AppModule {}

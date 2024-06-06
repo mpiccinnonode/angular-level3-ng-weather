@@ -1,44 +1,47 @@
-import {Injectable, Signal, signal} from '@angular/core';
-import { WeatherService } from "./weather.service";
-import {BehaviorSubject, Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
-export const LOCATIONS: string = "locations";
+export const LOCATIONS: string = 'locations';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root',
+})
 export class LocationService {
-  // refactoring locations into a signal to allow reactive updates notifications
-  private _locations = signal<string[]>(this._initLocations());
+    // refactoring locations into an Observable to allow reactive updates notifications
+    private _locationsSubject = new BehaviorSubject<string[]>(this._initLocations());
+    locations$ = this._locationsSubject.asObservable();
 
-  // allows readonly access to locations signal
-  get locations(): Signal<string[]> {
-    return this._locations.asReadonly();
-  }
+    get locations(): string[] {
+        return this._locationsSubject.value;
+    }
 
-  addLocation(zipcode: string): void {
-    this._locations.update((value) => {
-      value.push(zipcode);
-      return value;
-    });
-    this._cacheLocations();
-  }
+    set locations(value: string[]) {
+        this._locationsSubject.next(value);
+    }
 
-  removeLocation(zipcode: string): void {
-    this._locations.update((value) => {
-      const index = value.indexOf(zipcode);
-      if (index !== -1) {
-        value.splice(index, 1);
-      }
-      return value;
-    });
-    this._cacheLocations();
-  }
+    addLocation(zipcode: string): void {
+        const current = [...this.locations];
+        current.push(zipcode);
+        this.locations = [...current];
+        this._cacheLocations();
+    }
 
-  private _initLocations(): string[] {
-    let locString = localStorage.getItem(LOCATIONS);
-    return locString ? JSON.parse(locString) : [];
-  }
+    removeLocation(zipcode: string): void {
+        const current = [...this.locations];
+        const index = current.indexOf(zipcode);
+        if (index !== -1) {
+            current.splice(index, 1);
+        }
+        this.locations = [...current];
+        this._cacheLocations();
+    }
 
-  private _cacheLocations(): void {
-    localStorage.setItem(LOCATIONS, JSON.stringify(this._locations()));
-  }
+    private _initLocations(): string[] {
+        let locString = localStorage.getItem(LOCATIONS);
+        return locString ? JSON.parse(locString) : [];
+    }
+
+    private _cacheLocations(): void {
+        localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
+    }
 }
