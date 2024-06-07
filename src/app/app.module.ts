@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -16,6 +16,7 @@ import { TabItemComponent } from './shared/tab-view/tab-item/tab-item.component'
 import { TabViewComponent } from './shared/tab-view/tab-view.component';
 import { WeatherService } from './weather.service';
 import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
+import { cacheInterceptor } from './core/http/cache.interceptor';
 
 @NgModule({
     declarations: [AppComponent, ZipcodeEntryComponent, ForecastsListComponent, CurrentConditionsComponent, MainPageComponent],
@@ -32,7 +33,7 @@ import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
         TabViewComponent,
         TabItemComponent,
     ],
-    providers: [WeatherService],
+    providers: [WeatherService, provideHttpClient(withInterceptors([cacheInterceptor]))],
     bootstrap: [AppComponent],
 })
 export class AppModule {}
