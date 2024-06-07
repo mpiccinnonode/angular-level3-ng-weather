@@ -23,7 +23,7 @@ export class CurrentConditionsComponent implements OnInit {
 
     ngOnInit(): void {
         this.locationService.locations$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((locations) => {
-            this.weatherService.alignConditionsToLocations(locations);
+            this.weatherService.syncConditions(locations);
         });
     }
 

@@ -1,5 +1,5 @@
 import { Injectable, Signal, signal } from '@angular/core';
-import { Observable, forkJoin } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
@@ -16,7 +16,11 @@ export class WeatherService {
 
     constructor(private http: HttpClient) {}
 
-    alignConditionsToLocations(locations: string[]): void {
+    /**
+     * Syncs the currentConditions signal with the received locations array
+     * @param locations
+     */
+    syncConditions(locations: string[]): void {
         let conditions = this.currentConditions();
         // removes deleted locations from conditions array
         conditions = conditions.filter(({ zip }) => locations.includes(zip));
