@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CacheService } from '../core/services/cache.service';
 import { DurationForm } from './models/duration-form.model';
+import { isIntegerValidator } from './validators/is-integer.validator';
 
 @Component({
     selector: 'app-cache-duration-selector',
@@ -20,9 +21,9 @@ export class CacheDurationSelectorComponent {
 
     private _initForm(): void {
         this.durationForm = this.fb.group<DurationForm>({
-            hours: this.fb.control<number>(undefined, [Validators.min(0)]),
-            minutes: this.fb.control<number>(undefined, [Validators.min(0)]),
-            seconds: this.fb.control<number>(undefined, [Validators.min(0)]),
+            hours: this.fb.control<number>(undefined, [Validators.min(0), isIntegerValidator]),
+            minutes: this.fb.control<number>(undefined, [Validators.min(0), isIntegerValidator]),
+            seconds: this.fb.control<number>(undefined, [Validators.min(0), isIntegerValidator]),
         });
     }
 }
