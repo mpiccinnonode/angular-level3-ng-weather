@@ -2,10 +2,11 @@ import { Injectable, Signal, signal } from '@angular/core';
 import { forkJoin, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { ConditionsAndZip } from './conditions-and-zip.type';
 import { CurrentConditions } from './current-conditions/current-conditions.type';
 import { Forecast } from './forecasts-list/forecast.type';
+import { CACHE_RESPONSE } from './core/http/tokens/caching-enabled.token';
 
 @Injectable()
 export class WeatherService {
@@ -41,7 +42,9 @@ export class WeatherService {
 
     getForecast(zipcode: string): Observable<Forecast> {
         // Here we make a request to get the forecast data from the API. Note the use of backticks and an expression to insert the zipcode
-        return this.http.get<Forecast>(`${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`);
+        return this.http.get<Forecast>(`${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`, {
+            context: new HttpContext().set<boolean>(CACHE_RESPONSE, true),
+        });
     }
 
     getWeatherIcon(id): string {
@@ -83,6 +86,8 @@ export class WeatherService {
 
     private _addCurrentConditions(zipcode: string): Observable<CurrentConditions> {
         // Here we make a request to get the current conditions data from the API. Note the use of backticks and an expression to insert the zipcode
-        return this.http.get<CurrentConditions>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`);
+        return this.http.get<CurrentConditions>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`, {
+            context: new HttpContext().set<boolean>(CACHE_RESPONSE, true),
+        });
     }
 }
