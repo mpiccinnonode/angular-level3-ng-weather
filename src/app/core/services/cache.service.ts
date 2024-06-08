@@ -13,12 +13,16 @@ export class CacheService {
     /**
      * Cache's TTL in milliseconds
      */
-    timeToLiveInMillis: number = 30000;
+    private _timeToLiveInMillis: number = 30000;
 
     private readonly _cacheStorageKey = 'HTTP_CACHE';
 
     constructor() {
         this.cache = this._initCacheFromStorage();
+    }
+
+    get timeToLiveInMillis(): number {
+        return this._timeToLiveInMillis;
     }
 
     initCache(): void {
@@ -35,7 +39,7 @@ export class CacheService {
             const nowMillis = Date.now();
             const cachedResponseMillis = new Date(cachedResponse.date).getTime();
             const diff = nowMillis - cachedResponseMillis;
-            return diff >= this.timeToLiveInMillis;
+            return diff >= this._timeToLiveInMillis;
         } else {
             return false;
         }

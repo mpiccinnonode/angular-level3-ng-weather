@@ -17,6 +17,7 @@ import { TabViewComponent } from './shared/tab-view/tab-view.component';
 import { WeatherService } from './weather.service';
 import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
 import { cacheInterceptor } from './core/http/cache.interceptor';
+import { CacheDurationSelectorComponent } from './cache-duration-selector/cache-duration-selector.component';
 
 @NgModule({
     declarations: [AppComponent, ZipcodeEntryComponent, ForecastsListComponent, CurrentConditionsComponent, MainPageComponent],
@@ -32,6 +33,7 @@ import { cacheInterceptor } from './core/http/cache.interceptor';
         WeatherIconPipe,
         TabViewComponent,
         TabItemComponent,
+        CacheDurationSelectorComponent,
     ],
     providers: [WeatherService, provideHttpClient(withInterceptors([cacheInterceptor]))],
     bootstrap: [AppComponent],
