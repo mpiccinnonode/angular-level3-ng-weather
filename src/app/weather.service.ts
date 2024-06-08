@@ -1,6 +1,6 @@
 import { Injectable, Signal, signal } from '@angular/core';
-import { forkJoin, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { ConditionsAndZip } from './conditions-and-zip.type';
@@ -10,6 +10,9 @@ import { CACHE_RESPONSE } from './core/http/tokens/caching-enabled.token';
 
 @Injectable()
 export class WeatherService {
+    loadingRequest = signal<boolean>(false);
+    zipCodesErrorsMsg = signal<string[]>([]);
+
     static URL = 'https://api.openweathermap.org/data/2.5';
     static APPID = '5a4b2d457ecbef9eb2a71e480b947604';
     static ICON_URL = 'https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-hdpi/';
@@ -41,10 +44,17 @@ export class WeatherService {
     }
 
     getForecast(zipcode: string): Observable<Forecast> {
+        this.loadingRequest.set(true);
         // Here we make a request to get the forecast data from the API. Note the use of backticks and an expression to insert the zipcode
-        return this.http.get<Forecast>(`${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`, {
-            context: new HttpContext().set<boolean>(CACHE_RESPONSE, true),
-        });
+        return this.http
+            .get<Forecast>(`${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`, {
+                context: new HttpContext().set<boolean>(CACHE_RESPONSE, true),
+            })
+            .pipe(
+                tap(() => {
+                    this.loadingRequest.set(false);
+                }),
+            );
     }
 
     getWeatherIcon(id): string {
@@ -85,9 +95,23 @@ export class WeatherService {
     }
 
     private _addCurrentConditions(zipcode: string): Observable<CurrentConditions> {
+        this.loadingRequest.set(true);
         // Here we make a request to get the current conditions data from the API. Note the use of backticks and an expression to insert the zipcode
-        return this.http.get<CurrentConditions>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`, {
-            context: new HttpContext().set<boolean>(CACHE_RESPONSE, true),
-        });
+        return this.http
+            .get<CurrentConditions>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`, {
+                context: new HttpContext().set<boolean>(CACHE_RESPONSE, true),
+            })
+            .pipe(
+                tap(() => {
+                    this.loadingRequest.set(false);
+                }),
+                catchError((_) => {
+                    this.zipCodesErrorsMsg.update((value) => {
+                        value.push(`Zip code ${zipcode} not found`);
+                        return value;
+                    });
+                    return of(null);
+                }),
+            );
     }
 }

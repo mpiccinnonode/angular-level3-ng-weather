@@ -2,5 +2,15 @@
     <h2>Enter a zipcode:</h2>
     <input type="text" [(ngModel)]="zipcode" placeholder="Zipcode" class="form-control" />
     <br />
-    <button class="btn btn-primary" [disabled]="!zipcode" (click)="addLocation()">Add location</button>
+    <div class="d-flex align-center gap-2">
+        <button class="btn btn-primary" [disabled]="!zipcode" (click)="addLocation()">Add location</button>
+        @if (loadingRequest()) {
+            <span>Loading...</span>
+        }
+        @if (errors().length) {
+            @for (error of errors(); track error) {
+                <span class="text-danger">{{ error }}</span>
+            }
+        }
+    </div>
 </div>
