@@ -7,6 +7,10 @@ body {
     display: flex;
 }
 
+.align-center {
+    align-items: center;
+}
+
 .gap-1 {
     gap: 0.5rem;
 }

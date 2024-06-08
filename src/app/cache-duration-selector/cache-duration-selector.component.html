@@ -1,1 +1,40 @@
-<p>cache-duration-selector works!</p>
+<div class="well d-flex align-center gap-2">
+    <span>Cache data for:</span>&nbsp;
+    @if (durationForm) {
+        <form [formGroup]="durationForm">
+            <div class="d-flex gap-1">
+                <ng-container
+                    [ngTemplateOutlet]="durationFormField"
+                    [ngTemplateOutletContext]="{
+                        parent: durationForm,
+                        label: 'Hours',
+                        name: 'hours',
+                    }"
+                ></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="durationFormField"
+                    [ngTemplateOutletContext]="{
+                        parent: durationForm,
+                        label: 'Minutes',
+                        name: 'minutes',
+                    }"
+                ></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="durationFormField"
+                    [ngTemplateOutletContext]="{
+                        parent: durationForm,
+                        label: 'Seconds',
+                        name: 'seconds',
+                    }"
+                ></ng-container>
+            </div>
+        </form>
+    }
+</div>
+
+<ng-template #durationFormField let-parent="parent" let-label="label" let-name="name">
+    <div [formGroup]="parent">
+        <input type="number" class="form-control" [formControlName]="name" />
+        <span>{{ label }}</span>
+    </div>
+</ng-template>
