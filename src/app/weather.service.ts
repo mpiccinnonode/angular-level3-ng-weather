@@ -106,6 +106,7 @@ export class WeatherService {
                     this.loadingRequest.set(false);
                 }),
                 catchError((_) => {
+                    this.loadingRequest.set(false);
                     this.zipCodesErrorsMsg.update((value) => {
                         value.push(`Zip code ${zipcode} not found`);
                         return value;
