@@ -6,7 +6,13 @@ import { HttpResponse } from '@angular/common/http';
     providedIn: 'root',
 })
 export class CacheService {
+    /**
+     * Cache object
+     */
     cache = new Map<string, HttpCachedResponse>();
+    /**
+     * Cache's TTL in milliseconds
+     */
     timeToLiveInMillis: number = 30000;
 
     private readonly _cacheStorageKey = 'HTTP_CACHE';
@@ -22,6 +28,10 @@ export class CacheService {
     cacheExpired(url: string): boolean {
         const cachedResponse = this.cache.get(url);
         if (cachedResponse) {
+            /**
+             * Checks the milliseconds difference between the actual date/time
+             * and the cached response's one
+             */
             const nowMillis = Date.now();
             const cachedResponseMillis = new Date(cachedResponse.date).getTime();
             const diff = nowMillis - cachedResponseMillis;
@@ -38,9 +48,7 @@ export class CacheService {
 
     private _initCacheFromStorage(): Map<string, HttpCachedResponse> {
         const cacheString = localStorage.getItem(this._cacheStorageKey);
-        if (cacheString) {
-            return new Map<string, HttpCachedResponse>(JSON.parse(cacheString));
-        }
+        return new Map<string, HttpCachedResponse>(cacheString && JSON.parse(cacheString));
     }
 
     private _saveCacheInStorage(): void {
