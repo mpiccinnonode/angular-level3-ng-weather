@@ -12,4 +12,14 @@ export class TimeUtils {
         const secondsMillis = seconds * this.millisPerSecond;
         return hoursMillis + minutesMillis + secondsMillis;
     }
+
+    static millisToTimeInfo(millis: number): TimeInfo {
+        const zeroDay = new Date(0);
+        zeroDay.setTime(millis);
+        return {
+            hours: zeroDay.getUTCHours(),
+            minutes: zeroDay.getUTCMinutes(),
+            seconds: zeroDay.getUTCSeconds(),
+        };
+    }
 }

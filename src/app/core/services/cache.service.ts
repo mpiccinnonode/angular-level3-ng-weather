@@ -10,7 +10,7 @@ export class CacheService {
      * Cache object
      */
     cache = new Map<string, HttpCachedResponse>();
-    private readonly _ttlDefaultValue = 30000;
+    private readonly _ttlDefaultValue = 7_200_000;
     /**
      * Cache's TTL in milliseconds
      */
@@ -20,7 +20,7 @@ export class CacheService {
     private readonly _ttlStorageKey = 'CACHE_TTL_MILLIS';
 
     constructor() {
-        this.cache = this._initCacheFromStorage();
+        this.initCache();
     }
 
     get timeToLiveInMillis(): Signal<number> {
