@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Signal, signal } from '@angular/core';
 import { HttpCachedResponse } from '../models/http-cached-response.model';
 import { HttpResponse } from '@angular/common/http';
 
@@ -10,23 +10,31 @@ export class CacheService {
      * Cache object
      */
     cache = new Map<string, HttpCachedResponse>();
+    private readonly _ttlDefaultValue = 30000;
     /**
      * Cache's TTL in milliseconds
      */
-    private _timeToLiveInMillis: number = 30000;
+    private _timeToLiveInMillis = signal<number>(this._initTtlFromStorage());
 
     private readonly _cacheStorageKey = 'HTTP_CACHE';
+    private readonly _ttlStorageKey = 'CACHE_TTL_MILLIS';
 
     constructor() {
         this.cache = this._initCacheFromStorage();
     }
 
-    get timeToLiveInMillis(): number {
-        return this._timeToLiveInMillis;
+    get timeToLiveInMillis(): Signal<number> {
+        return this._timeToLiveInMillis.asReadonly();
+    }
+
+    setTimeToLive(value: number) {
+        this._timeToLiveInMillis.set(value);
+        this._saveTtlInStorage();
     }
 
     initCache(): void {
         this.cache = new Map<string, HttpCachedResponse>(this._initCacheFromStorage());
+        this._timeToLiveInMillis.set(this._initTtlFromStorage());
     }
 
     cacheExpired(url: string): boolean {
@@ -39,7 +47,7 @@ export class CacheService {
             const nowMillis = Date.now();
             const cachedResponseMillis = new Date(cachedResponse.date).getTime();
             const diff = nowMillis - cachedResponseMillis;
-            return diff >= this._timeToLiveInMillis;
+            return diff >= this._timeToLiveInMillis();
         } else {
             return false;
         }
@@ -58,5 +66,14 @@ export class CacheService {
     private _saveCacheInStorage(): void {
         const saveValue = Array.from(this.cache);
         localStorage.setItem(this._cacheStorageKey, JSON.stringify(saveValue));
+    }
+
+    private _initTtlFromStorage(): number {
+        const ttlString = localStorage.getItem(this._ttlStorageKey);
+        return ttlString ? parseInt(ttlString) : this._ttlDefaultValue;
+    }
+
+    private _saveTtlInStorage(): void {
+        localStorage.setItem(this._ttlStorageKey, JSON.stringify(this._timeToLiveInMillis()));
     }
 }
