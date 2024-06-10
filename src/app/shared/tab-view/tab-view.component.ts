@@ -53,7 +53,6 @@ export class TabViewComponent implements AfterContentChecked {
         if (tabItem.active) {
             this._activeIndex$.next(0);
         }
-        // this._checkForSingleElement();
         this.tabRemoved.emit({ removedIndex: index });
     }
 
