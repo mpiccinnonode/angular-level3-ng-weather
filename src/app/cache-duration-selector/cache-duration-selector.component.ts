@@ -25,6 +25,10 @@ export class CacheDurationSelectorComponent implements OnInit {
         private cacheService: CacheService,
     ) {
         effect(() => {
+            /**
+             * Preloads the duration form with the current
+             * time-to-live value
+             */
             if (this._ttlValue()) {
                 this._initForm(TimeUtils.millisToTimeInfo(this._ttlValue()));
             }
@@ -38,6 +42,10 @@ export class CacheDurationSelectorComponent implements OnInit {
     submitDuration(): void {
         const timeOutput = this.durationForm.value as TimeInfo;
         this.cacheService.setTimeToLive(TimeUtils.timeInfoToMillis(timeOutput));
+        /**
+         * Briefly shows the "Duration updated"
+         * feedback message
+         */
         this.showFeedbackMessage.set(true);
         setTimeout(() => {
             this.showFeedbackMessage.set(false);

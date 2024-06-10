@@ -22,6 +22,9 @@ export class CurrentConditionsComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
+        /**
+         * Listens for changes in the locations array and syncs it with the current conditions
+         */
         this.locationService.locations$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((locations) => {
             this.weatherService.syncConditions(locations);
         });
@@ -31,6 +34,10 @@ export class CurrentConditionsComponent implements OnInit {
         this.router.navigate(['/forecast', zipcode]);
     }
 
+    /**
+     * Intercepts the tab removal event and deletes the location at the removed tab's index
+     * @param event
+     */
     removeLocationTab(event: TabRemovedEvent): void {
         const { removedIndex } = event;
         const location = this.currentConditionsByZip()[removedIndex];

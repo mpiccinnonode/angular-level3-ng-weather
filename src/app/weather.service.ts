@@ -11,6 +11,9 @@ import { CACHE_RESPONSE } from './core/http/tokens/caching-enabled.token';
 @Injectable()
 export class WeatherService {
     loadingRequest = signal<boolean>(false);
+    /**
+     * Used to notify user if any prompted/cached zipcode is not found by the API
+     */
     zipCodesErrorsMsg = signal<string[]>([]);
 
     static URL = 'https://api.openweathermap.org/data/2.5';
@@ -26,7 +29,9 @@ export class WeatherService {
      */
     syncConditions(locations: string[]): void {
         let conditions = this.currentConditions();
-        // removes deleted locations from conditions array
+        /**
+         * removes deleted locations from conditions array
+         */
         conditions = conditions.filter(({ zip }) => locations.includes(zip));
         this.currentConditions.set(conditions);
         /**
