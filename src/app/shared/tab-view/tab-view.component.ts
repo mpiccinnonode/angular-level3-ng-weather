@@ -1,4 +1,4 @@
-import { AfterContentChecked, Component, ContentChildren, DestroyRef, EventEmitter, Output, QueryList, signal } from '@angular/core';
+import { AfterContentChecked, Component, ContentChildren, DestroyRef, EventEmitter, Output, QueryList } from '@angular/core';
 import { TabItemComponent } from './tab-item/tab-item.component';
 import { NgClass, NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { TabRemovedEvent } from './models/tab-removed-event.model';
@@ -15,8 +15,7 @@ export class TabViewComponent implements AfterContentChecked {
     @ContentChildren(TabItemComponent) tabItems: QueryList<TabItemComponent>;
     @Output() tabRemoved = new EventEmitter<TabRemovedEvent>();
 
-    activeIndex = signal<number>(0);
-
+    private _activeIndex = 0;
     private _firstValueSet = false;
 
     constructor(private destroyRef: DestroyRef) {}
@@ -26,7 +25,7 @@ export class TabViewComponent implements AfterContentChecked {
         if (!this._firstValueSet) {
             if (this.tabItems && this.tabItems.length) {
                 this.tabItems.first.active = true;
-                this.tabItems.first.cd.markForCheck();
+                this.tabItems.first.cd.detectChanges();
                 this._listenForSingleTab();
                 this._firstValueSet = true;
             }
@@ -35,13 +34,13 @@ export class TabViewComponent implements AfterContentChecked {
 
     // sets the selected tab as active and hides the previously selected one
     setActiveTab(index: number): void {
-        const currentlyActive = this.tabItems.get(this.activeIndex());
-        this.activeIndex.set(index);
-        const toActivate = this.tabItems.get(this.activeIndex());
+        const currentlyActive = this.tabItems.get(this._activeIndex);
+        this._activeIndex = index;
+        const toActivate = this.tabItems.get(this._activeIndex);
         currentlyActive.active = false;
         toActivate.active = true;
-        currentlyActive.cd.markForCheck();
-        toActivate.cd.markForCheck();
+        currentlyActive.cd.detectChanges();
+        toActivate.cd.detectChanges();
     }
 
     // removes the clicked tab item and emits an event with the removed element index
@@ -49,20 +48,36 @@ export class TabViewComponent implements AfterContentChecked {
         event.stopPropagation();
         const tabItem = this.tabItems.get(index);
         if (tabItem.active) {
-            this.setActiveTab(0);
+            this.tabItems.first.active = true;
+            this._activeIndex = 0;
+            this.tabItems.first.cd.detectChanges();
         }
         tabItem.removed = true;
-        tabItem.cd.markForCheck();
+        tabItem.cd.detectChanges();
+        this._checkForSingleElement();
         this.tabRemoved.emit({ removedIndex: index });
     }
 
     // sets active tab if it's the only item
     private _listenForSingleTab(): void {
         this.tabItems.changes.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            if (this.tabItems && this.tabItems.length == 1) {
-                this.tabItems.first.active = true;
-                this.tabItems.first.cd.detectChanges();
-            }
+            this._checkForSingleElement();
         });
+    }
+
+    private _checkForSingleElement(): void {
+        if (this.tabItems) {
+            const notRemoved: TabItemComponent[] = [];
+            this.tabItems.forEach((tab) => {
+                if (!tab.removed) {
+                    notRemoved.push(tab);
+                }
+            });
+            if (notRemoved.length === 1) {
+                const notRemovedItem = notRemoved[0];
+                notRemovedItem.active = true;
+                notRemovedItem.cd.detectChanges();
+            }
+        }
     }
 }

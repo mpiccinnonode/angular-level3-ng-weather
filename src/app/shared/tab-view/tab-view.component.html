@@ -2,7 +2,8 @@
     <div class="d-flex gap-1">
         @for (tab of tabItems; track tab.title; let index = $index) {
             @if (!tab.removed) {
-                <ng-container [ngTemplateOutlet]="tabTitle" [ngTemplateOutletContext]="{ title: tab.title, index }"></ng-container>
+                <ng-container [ngTemplateOutlet]="tabTitle"
+                              [ngTemplateOutletContext]="{ title: tab.title, active: tab.active, index }"></ng-container>
             }
         }
     </div>
@@ -11,8 +12,9 @@
     </div>
 }
 
-<ng-template #tabTitle let-title="title" let-index="index">
-    <div class="px-3 py-2 bg-primary border clickable d-flex gap-2" [ngClass]="{ active: index === activeIndex() }" (click)="setActiveTab(index)">
+<ng-template #tabTitle let-title="title" let-active="active" let-index="index">
+    <div class="px-3 py-2 bg-primary border clickable d-flex gap-2" [ngClass]="{ active }"
+         (click)="setActiveTab(index)">
         <span>{{ title }}</span>
         <span class="close" (click)="removeTab($event, index)">&times;</span>
     </div>
