@@ -3,6 +3,7 @@ import { TabItemComponent } from './tab-item/tab-item.component';
 import { NgClass, NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { TabRemovedEvent } from './models/tab-removed-event.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'app-tab-view',
@@ -15,7 +16,7 @@ export class TabViewComponent implements AfterContentChecked {
     @ContentChildren(TabItemComponent) tabItems: QueryList<TabItemComponent>;
     @Output() tabRemoved = new EventEmitter<TabRemovedEvent>();
 
-    private _activeIndex = 0;
+    private _activeIndex$ = new BehaviorSubject<number>(0);
     private _firstValueSet = false;
 
     constructor(private destroyRef: DestroyRef) {}
@@ -24,60 +25,61 @@ export class TabViewComponent implements AfterContentChecked {
     ngAfterContentChecked(): void {
         if (!this._firstValueSet) {
             if (this.tabItems && this.tabItems.length) {
-                this.tabItems.first.active = true;
-                this.tabItems.first.cd.detectChanges();
+                this._updateActivationStatus();
                 this._listenForSingleTab();
                 this._firstValueSet = true;
             }
         }
     }
 
-    // sets the selected tab as active and hides the previously selected one
+    /**
+     * sets the selected tab as active
+     * @param index
+     */
     setActiveTab(index: number): void {
-        const currentlyActive = this.tabItems.get(this._activeIndex);
-        this._activeIndex = index;
-        const toActivate = this.tabItems.get(this._activeIndex);
-        currentlyActive.active = false;
-        toActivate.active = true;
-        currentlyActive.cd.detectChanges();
-        toActivate.cd.detectChanges();
+        this._activeIndex$.next(index);
     }
 
-    // removes the clicked tab item and emits an event with the removed element index
+    /**
+     * removes the clicked tab item and emits an event with the removed element index
+     * @param event
+     * @param index
+     */
     removeTab(event: MouseEvent, index: number): void {
         event.stopPropagation();
         const tabItem = this.tabItems.get(index);
-        if (tabItem.active) {
-            this.tabItems.first.active = true;
-            this._activeIndex = 0;
-            this.tabItems.first.cd.detectChanges();
-        }
         tabItem.removed = true;
         tabItem.cd.detectChanges();
-        this._checkForSingleElement();
+        if (tabItem.active) {
+            this._activeIndex$.next(0);
+        }
+        // this._checkForSingleElement();
         this.tabRemoved.emit({ removedIndex: index });
     }
 
-    // sets active tab if it's the only item
+    /**
+     * sets active tab if it's the only item
+     */
     private _listenForSingleTab(): void {
         this.tabItems.changes.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this._checkForSingleElement();
+            if (this.tabItems.length === 1) {
+                this._activeIndex$.next(0);
+            }
         });
     }
 
-    private _checkForSingleElement(): void {
-        if (this.tabItems) {
-            const notRemoved: TabItemComponent[] = [];
-            this.tabItems.forEach((tab) => {
+    /**
+     * updates the activation status of all tabs whenever the active index changes
+     * @private
+     */
+    private _updateActivationStatus(): void {
+        this._activeIndex$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+            this.tabItems.forEach((tab, index) => {
                 if (!tab.removed) {
-                    notRemoved.push(tab);
+                    tab.active = index === value;
+                    tab.cd.detectChanges();
                 }
             });
-            if (notRemoved.length === 1) {
-                const notRemovedItem = notRemoved[0];
-                notRemovedItem.active = true;
-                notRemovedItem.cd.detectChanges();
-            }
-        }
+        });
     }
 }
